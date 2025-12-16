@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>聖經朗讀 - 和合本</title>
+    <meta name="description" content="選擇聖經經文範圍，完整顯示經文內容，適合 TTS 朗讀使用">
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+    <div class="app-container">
+        <header class="header">
+            <h1>📖 聖經朗讀</h1>
+            <p class="subtitle">和合本 · 選擇經文範圍</p>
+        </header>
+
+        <main class="main-content">
+            <!-- 經文範圍選擇器 -->
+            <section class="range-selector" id="rangeSelector">
+                <div class="selector-group">
+                    <label class="selector-label">從</label>
+                    <div class="selector-row">
+                        <select id="startBook" class="book-select" aria-label="起始書卷">
+                            <option value="">選擇書卷</option>
+                        </select>
+                        <select id="startChapter" class="chapter-select" aria-label="起始章節" disabled>
+                            <option value="">章</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="selector-group">
+                    <label class="selector-label">到</label>
+                    <div class="selector-row">
+                        <select id="endBook" class="book-select" aria-label="結束書卷">
+                            <option value="">選擇書卷</option>
+                        </select>
+                        <select id="endChapter" class="chapter-select" aria-label="結束章節" disabled>
+                            <option value="">章</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button id="displayBtn" class="display-btn" disabled>
+                    <span class="btn-icon">📜</span>
+                    <span>顯示經文</span>
+                </button>
+            </section>
+
+            <!-- 輔助功能 -->
+            <section class="toolbar" id="toolbar" style="display: none;">
+                <div class="font-controls">
+                    <span class="toolbar-label">字體大小</span>
+                    <button id="fontDecrease" class="font-btn" aria-label="縮小字體">A-</button>
+                    <span id="fontSizeDisplay" class="font-size-display">20</span>
+                    <button id="fontIncrease" class="font-btn" aria-label="放大字體">A+</button>
+                </div>
+                <button id="scrollTop" class="scroll-btn" aria-label="回到頂部">↑ 頂部</button>
+            </section>
+
+            <!-- 經文顯示區 -->
+            <section class="scripture-display" id="scriptureDisplay">
+                <div class="loading-message" id="loadingMessage">
+                    <div class="spinner"></div>
+                    <p>載入聖經資料中...</p>
+                </div>
+                <div class="scripture-content" id="scriptureContent"></div>
+            </section>
+        </main>
+
+        <footer class="footer">
+            <p>聖經和合本 · 適合 TTS 朗讀使用</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
