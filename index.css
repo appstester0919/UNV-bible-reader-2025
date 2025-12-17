@@ -4,33 +4,35 @@
     --bg-secondary: #1a2332;
     --bg-card: #232f3e;
     --bg-input: #2d3a4d;
-    
+
     --text-primary: #e8eef5;
     --text-secondary: #a0aec0;
     --text-muted: #718096;
-    
+
     --accent-primary: #6366f1;
     --accent-hover: #818cf8;
     --accent-glow: rgba(99, 102, 241, 0.3);
-    
+
     --chapter-title: #fbbf24;
     --verse-number: #60a5fa;
-    
+
     --border-color: #3d4f66;
     --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.3);
     --shadow-glow: 0 0 20px var(--accent-glow);
-    
+
     --font-size-base: 20px;
     --font-size-verse: var(--font-size-base);
     --spacing-unit: 8px;
     --border-radius: 12px;
-    
+
     --transition-fast: 0.15s ease;
     --transition-normal: 0.3s ease;
 }
 
 /* ===== Reset & Base ===== */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
@@ -118,7 +120,8 @@ body {
     gap: calc(var(--spacing-unit) * 1.5);
 }
 
-.book-select, .chapter-select {
+.book-select,
+.chapter-select {
     flex: 1;
     padding: calc(var(--spacing-unit) * 1.5) calc(var(--spacing-unit) * 2);
     font-size: 1rem;
@@ -267,6 +270,41 @@ body {
     color: white;
 }
 
+/* ===== Verse Number Toggle ===== */
+.verse-number-toggle {
+    display: flex;
+    align-items: center;
+}
+
+.toggle-label {
+    display: flex;
+    align-items: center;
+    gap: calc(var(--spacing-unit) * 0.75);
+    cursor: pointer;
+    user-select: none;
+}
+
+.toggle-label input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--accent-primary);
+    cursor: pointer;
+}
+
+.toggle-text {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+/* Hide verse numbers when toggle is off */
+.scripture-content.hide-verse-numbers .verse-number {
+    display: none;
+}
+
+.scripture-content.hide-verse-numbers .verse {
+    gap: 0;
+}
+
 /* ===== Scripture Display ===== */
 .scripture-display {
     flex: 1;
@@ -297,7 +335,9 @@ body {
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .scripture-content {
@@ -358,37 +398,38 @@ body {
     .app-container {
         padding: var(--spacing-unit);
     }
-    
+
     .header h1 {
         font-size: 1.6rem;
     }
-    
+
     .range-selector {
         padding: calc(var(--spacing-unit) * 2);
     }
-    
+
     .selector-row {
         flex-direction: column;
     }
-    
-    .book-select, .chapter-select {
+
+    .book-select,
+    .chapter-select {
         width: 100%;
     }
-    
+
     .chapter-block {
         padding: calc(var(--spacing-unit) * 2);
     }
-    
+
     .toolbar {
         flex-direction: column;
         gap: var(--spacing-unit);
     }
-    
+
     .font-controls {
         width: 100%;
         justify-content: center;
     }
-    
+
     .scroll-btn {
         width: 100%;
     }

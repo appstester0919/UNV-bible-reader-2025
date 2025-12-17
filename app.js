@@ -34,6 +34,7 @@ function cacheElements() {
     elements.fontDecrease = document.getElementById('fontDecrease');
     elements.fontIncrease = document.getElementById('fontIncrease');
     elements.fontSizeDisplay = document.getElementById('fontSizeDisplay');
+    elements.showVerseNumbers = document.getElementById('showVerseNumbers');
     elements.scrollTop = document.getElementById('scrollTop');
     elements.loadingMessage = document.getElementById('loadingMessage');
     elements.scriptureContent = document.getElementById('scriptureContent');
@@ -60,6 +61,9 @@ function bindEvents() {
     // 字體大小控制
     elements.fontDecrease.addEventListener('click', () => adjustFontSize(-2));
     elements.fontIncrease.addEventListener('click', () => adjustFontSize(2));
+
+    // 節次顯示切換
+    elements.showVerseNumbers.addEventListener('change', toggleVerseNumbers);
 
     // 回到頂部
     elements.scrollTop.addEventListener('click', () => {
@@ -245,4 +249,14 @@ function adjustFontSize(delta) {
     state.fontSize = newSize;
     elements.fontSizeDisplay.textContent = newSize;
     elements.scriptureContent.style.fontSize = `${newSize}px`;
+}
+
+// ===== 節次顯示切換 =====
+function toggleVerseNumbers() {
+    const showNumbers = elements.showVerseNumbers.checked;
+    if (showNumbers) {
+        elements.scriptureContent.classList.remove('hide-verse-numbers');
+    } else {
+        elements.scriptureContent.classList.add('hide-verse-numbers');
+    }
 }

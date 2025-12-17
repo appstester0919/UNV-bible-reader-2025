@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +8,7 @@
     <meta name="description" content="選擇聖經經文範圍，完整顯示經文內容，適合 TTS 朗讀使用">
     <link rel="stylesheet" href="index.css">
 </head>
+
 <body>
     <div class="app-container">
         <header class="header">
@@ -55,6 +57,12 @@
                     <span id="fontSizeDisplay" class="font-size-display">20</span>
                     <button id="fontIncrease" class="font-btn" aria-label="放大字體">A+</button>
                 </div>
+                <div class="verse-number-toggle">
+                    <label class="toggle-label">
+                        <input type="checkbox" id="showVerseNumbers" checked>
+                        <span class="toggle-text">顯示節次</span>
+                    </label>
+                </div>
                 <button id="scrollTop" class="scroll-btn" aria-label="回到頂部">↑ 頂部</button>
             </section>
 
@@ -75,4 +83,5 @@
 
     <script src="app.js"></script>
 </body>
+
 </html>
