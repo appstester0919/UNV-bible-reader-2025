@@ -19,27 +19,30 @@
         <main class="main-content">
             <!-- 經文範圍選擇器 -->
             <section class="range-selector" id="rangeSelector">
+                <!-- 起始選擇 -->
                 <div class="selector-group">
-                    <label class="selector-label">從</label>
-                    <div class="selector-row">
-                        <select id="startBook" class="book-select" aria-label="起始書卷">
-                            <option value="">選擇書卷</option>
-                        </select>
-                        <select id="startChapter" class="chapter-select" aria-label="起始章節" disabled>
-                            <option value="">章</option>
-                        </select>
+                    <label class="selector-label">📍 從</label>
+                    <div class="book-grid-wrapper">
+                        <div class="selection-display" id="startSelectionDisplay">
+                            <span class="selection-placeholder">選擇起始書卷和章節</span>
+                        </div>
+                        <div class="book-grid" id="startBookGrid"></div>
+                        <div class="chapter-grid" id="startChapterGrid"></div>
                     </div>
                 </div>
 
+                <!-- 結束選擇 -->
                 <div class="selector-group">
-                    <label class="selector-label">到</label>
-                    <div class="selector-row">
-                        <select id="endBook" class="book-select" aria-label="結束書卷">
-                            <option value="">選擇書卷</option>
-                        </select>
-                        <select id="endChapter" class="chapter-select" aria-label="結束章節" disabled>
-                            <option value="">章</option>
-                        </select>
+                    <label class="selector-label">🏁 到</label>
+                    <div class="selection-hint hidden" id="endSelectionHint">
+                        起始：<span id="startHintText">--</span>
+                    </div>
+                    <div class="book-grid-wrapper">
+                        <div class="selection-display" id="endSelectionDisplay">
+                            <span class="selection-placeholder">選擇結束書卷和章節</span>
+                        </div>
+                        <div class="book-grid" id="endBookGrid"></div>
+                        <div class="chapter-grid" id="endChapterGrid"></div>
                     </div>
                 </div>
 
