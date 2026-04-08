@@ -7,12 +7,85 @@
     <title>聖經朗讀 - 和合本</title>
     <meta name="description" content="選擇聖經經文範圍，完整顯示經文內容，適合 TTS 朗讀使用">
     <link rel="stylesheet" href="index.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Source+Sans+3:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 
 <body>
+    <!-- Fixed Audio Player Bar (TOP) -->
+    <header class="player-bar" id="playerBar">
+        <div class="player-bar-inner">
+            <!-- Chapter Display -->
+            <div class="player-chapter-display" id="playerChapterDisplay">
+                <span class="player-chapter-text">創世記 1:1-31</span>
+            </div>
+
+            <!-- Navigation Controls -->
+            <div class="player-nav">
+                <button id="prevChapterBtn" class="player-nav-btn" aria-label="上一章">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                    <span>上一章</span>
+                </button>
+            </div>
+
+            <!-- Playback Controls -->
+            <div class="player-controls">
+                <button id="playBtn" class="player-play-btn" aria-label="播放">
+                    <svg id="playIcon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                    </svg>
+                    <svg id="pauseIcon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" class="hidden">
+                        <rect x="6" y="4" width="4" height="16"></rect>
+                        <rect x="14" y="4" width="4" height="16"></rect>
+                    </svg>
+                    <span id="playBtnText">播放</span>
+                </button>
+                <button id="stopBtn" class="player-stop-btn" aria-label="停止">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <rect x="4" y="4" width="16" height="16" rx="2"></rect>
+                    </svg>
+                    <span>停止</span>
+                </button>
+            </div>
+
+            <!-- Next Chapter -->
+            <div class="player-nav">
+                <button id="nextChapterBtn" class="player-nav-btn" aria-label="下一章">
+                    <span>下一章</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Speed Controls -->
+            <div class="player-speed">
+                <span class="player-speed-label">速度</span>
+                <div class="player-speed-btns">
+                    <button class="speed-btn" data-rate="1.0">1.0x</button>
+                    <button class="speed-btn" data-rate="1.25">1.25x</button>
+                    <button class="speed-btn" data-rate="1.5">1.5x</button>
+                    <button class="speed-btn" data-rate="1.75">1.75x</button>
+                    <button class="speed-btn" data-rate="2.0">2.0x</button>
+                </div>
+            </div>
+
+            <!-- Font Size Controls -->
+            <div class="player-font">
+                <button id="fontDecrease" class="player-font-btn" aria-label="縮小字體">A-</button>
+                <span id="fontSizeDisplay" class="player-font-size">20</span>
+                <button id="fontIncrease" class="player-font-btn" aria-label="放大字體">A+</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content (scrolls below fixed bar) -->
     <div class="app-container">
         <header class="header">
-            <h1>📖 聖經朗讀</h1>
+            <h1>聖經朗讀</h1>
             <p class="subtitle">和合本 · 選擇經文範圍</p>
         </header>
 
@@ -21,7 +94,13 @@
             <section class="range-selector" id="rangeSelector">
                 <!-- 起始選擇 -->
                 <div class="selector-group">
-                    <label class="selector-label">📍 從</label>
+                    <label class="selector-label">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                        從
+                    </label>
                     <div class="book-grid-wrapper">
                         <div class="selection-display" id="startSelectionDisplay">
                             <span class="selection-placeholder">選擇起始書卷和章節</span>
@@ -33,7 +112,12 @@
 
                 <!-- 結束選擇 -->
                 <div class="selector-group">
-                    <label class="selector-label">🏁 到</label>
+                    <label class="selector-label">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        到
+                    </label>
                     <div class="selection-hint hidden" id="endSelectionHint">
                         起始：<span id="startHintText">--</span>
                     </div>
@@ -47,26 +131,31 @@
                 </div>
 
                 <button id="displayBtn" class="display-btn" disabled>
-                    <span class="btn-icon">📜</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg>
                     <span>顯示經文</span>
                 </button>
             </section>
 
-            <!-- 輔助功能 -->
+            <!-- 輔助功能 toolbar -->
             <section class="toolbar" id="toolbar" style="display: none;">
-                <div class="font-controls">
-                    <span class="toolbar-label">字體大小</span>
-                    <button id="fontDecrease" class="font-btn" aria-label="縮小字體">A-</button>
-                    <span id="fontSizeDisplay" class="font-size-display">20</span>
-                    <button id="fontIncrease" class="font-btn" aria-label="放大字體">A+</button>
-                </div>
                 <div class="verse-number-toggle">
                     <label class="toggle-label">
                         <input type="checkbox" id="showVerseNumbers" checked>
                         <span class="toggle-text">顯示節次</span>
                     </label>
                 </div>
-                <button id="scrollTop" class="scroll-btn" aria-label="回到頂部">↑ 頂部</button>
+                <button id="scrollTop" class="scroll-btn" aria-label="回到頂部">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="18 15 12 9 6 15"></polyline>
+                    </svg>
+                    頂部
+                </button>
             </section>
 
             <!-- 經文顯示區 -->

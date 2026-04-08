@@ -1,7 +1,7 @@
 /**
  * 聖經朗讀網頁應用程式
  * 和合本聖經經文範圍顯示工具
- * 優化版本 - 格子式書卷選擇器
+ * 古典聖經風格重新設計 (2026-04-08)
  */
 
 // ===== 書卷類別定義 =====
@@ -66,7 +66,14 @@ const state = {
     startBook: null,    // { abbr, name, chapters }
     startChapter: null,
     endBook: null,
-    endChapter: null
+    endChapter: null,
+    // 音頻播放狀態
+    audioQueue: [],     // [{ bookAbbr, chapter, label }]
+    currentAudio: null, // HTMLAudioElement
+    currentChapterIndex: 0,
+    isPlaying: false,
+    playbackRate: 1.0,
+    isPreloading: false
 };
 
 // ===== DOM 元素 =====
@@ -78,6 +85,7 @@ document.addEventListener('DOMContentLoaded', init);
 async function init() {
     cacheElements();
     bindEvents();
+    initAudio();
     await loadBibleData();
 }
 
@@ -106,6 +114,18 @@ function cacheElements() {
     elements.scrollTop = document.getElementById('scrollTop');
     elements.loadingMessage = document.getElementById('loadingMessage');
     elements.scriptureContent = document.getElementById('scriptureContent');
+
+    // Fixed Player Bar elements
+    elements.playerBar = document.getElementById('playerBar');
+    elements.playerChapterDisplay = document.getElementById('playerChapterDisplay');
+    elements.playBtn = document.getElementById('playBtn');
+    elements.stopBtn = document.getElementById('stopBtn');
+    elements.playIcon = document.getElementById('playIcon');
+    elements.pauseIcon = document.getElementById('pauseIcon');
+    elements.playBtnText = document.getElementById('playBtnText');
+    elements.speedBtns = document.querySelectorAll('.speed-btn');
+    elements.prevChapterBtn = document.getElementById('prevChapterBtn');
+    elements.nextChapterBtn = document.getElementById('nextChapterBtn');
 }
 
 function bindEvents() {
@@ -119,7 +139,7 @@ function bindEvents() {
     // 顯示經文按鈕
     elements.displayBtn.addEventListener('click', displayScripture);
 
-    // 字體大小控制
+    // 字體大小控制 (player bar)
     elements.fontDecrease.addEventListener('click', () => adjustFontSize(-2));
     elements.fontIncrease.addEventListener('click', () => adjustFontSize(2));
 
@@ -130,6 +150,284 @@ function bindEvents() {
     elements.scrollTop.addEventListener('click', () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     });
+}
+
+// ===== 音頻播放器初始化 =====
+function initAudio() {
+    // 創建音頻元素
+    state.audioQueue = [];
+    state.currentAudio = null;
+    state.currentChapterIndex = 0;
+    state.isPlaying = false;
+    state.playbackRate = 1.0;
+
+    // 綁定播放按鈕事件
+    if (elements.playBtn) {
+        elements.playBtn.addEventListener('click', togglePlay);
+    }
+    if (elements.stopBtn) {
+        elements.stopBtn.addEventListener('click', stopAudio);
+    }
+
+    // 綁定速度按鈕事件
+    if (elements.speedBtns) {
+        elements.speedBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const rate = parseFloat(btn.dataset.rate);
+                setPlaybackRate(rate);
+            });
+        });
+    }
+
+    // 綁定上一章/下一章按鈕
+    if (elements.prevChapterBtn) {
+        elements.prevChapterBtn.addEventListener('click', goToPrevChapter);
+    }
+    if (elements.nextChapterBtn) {
+        elements.nextChapterBtn.addEventListener('click', goToNextChapter);
+    }
+
+    updatePlayButton();
+    updateSpeedButtons();
+    updatePlayerChapterDisplay();
+}
+
+// ===== 上一章 / 下一章 導航 =====
+function goToPrevChapter() {
+    if (state.audioQueue.length === 0) return;
+
+    // 移動到上一章
+    state.currentChapterIndex--;
+
+    // 如果到了最開始，環繞到最後一章
+    if (state.currentChapterIndex < 0) {
+        state.currentChapterIndex = state.audioQueue.length - 1;
+    }
+
+    // 停止當前音頻並載入新章節
+    if (state.currentAudio) {
+        state.currentAudio.pause();
+        state.currentAudio = null;
+    }
+
+    const item = state.audioQueue[state.currentChapterIndex];
+    if (item) {
+        loadAudio(item);
+    }
+
+    updatePlayerChapterDisplay();
+}
+
+function goToNextChapter() {
+    if (state.audioQueue.length === 0) return;
+
+    // 移動到下一章
+    state.currentChapterIndex++;
+
+    // 如果到了最後，環繞到第一章
+    if (state.currentChapterIndex >= state.audioQueue.length) {
+        state.currentChapterIndex = 0;
+    }
+
+    // 停止當前音頻並載入新章節
+    if (state.currentAudio) {
+        state.currentAudio.pause();
+        state.currentAudio = null;
+    }
+
+    const item = state.audioQueue[state.currentChapterIndex];
+    if (item) {
+        loadAudio(item);
+    }
+
+    updatePlayerChapterDisplay();
+}
+
+// ===== 音頻播放控制 =====
+function togglePlay() {
+    if (state.isPlaying) {
+        pauseAudio();
+    } else {
+        playAudio();
+    }
+}
+
+function playAudio() {
+    if (!state.audioQueue || state.audioQueue.length === 0) {
+        console.log('No audio queue to play');
+        return;
+    }
+
+    if (state.currentChapterIndex >= state.audioQueue.length) {
+        // 播放完畢，重置
+        state.currentChapterIndex = 0;
+    }
+
+    const currentItem = state.audioQueue[state.currentChapterIndex];
+    if (!currentItem) return;
+
+    // 如果沒有當前音頻或已停止，創建新的
+    if (!state.currentAudio) {
+        loadAudio(currentItem);
+    } else {
+        state.currentAudio.play();
+    }
+
+    state.isPlaying = true;
+    updatePlayButton();
+    updatePlayerChapterDisplay();
+}
+
+function pauseAudio() {
+    if (state.currentAudio) {
+        state.currentAudio.pause();
+    }
+    state.isPlaying = false;
+    updatePlayButton();
+}
+
+function stopAudio() {
+    if (state.currentAudio) {
+        state.currentAudio.pause();
+        state.currentAudio.currentTime = 0;
+        state.currentAudio = null;
+    }
+    state.isPlaying = false;
+    state.currentChapterIndex = 0;
+    updatePlayButton();
+    updatePlayerChapterDisplay();
+}
+
+function loadAudio(item) {
+    if (state.currentAudio) {
+        state.currentAudio.pause();
+        state.currentAudio = null;
+    }
+
+    // 構建音頻 URL
+    const audioSrc = `audio/${item.bookAbbr}/${item.bookAbbr}${item.chapter}.mp3`;
+    const audio = new Audio(audioSrc);
+
+    audio.addEventListener('loadeddata', () => {
+        console.log(`Audio loaded: ${audioSrc}`);
+    });
+
+    audio.addEventListener('error', (e) => {
+        console.error(`Audio load error: ${audioSrc}`, e);
+        // 嘗試播放下一章
+        onAudioEnded();
+    });
+
+    audio.addEventListener('ended', onAudioEnded);
+
+    audio.playbackRate = state.playbackRate;
+    state.currentAudio = audio;
+    state.isPlaying = true;
+
+    audio.play().catch(err => {
+        console.error('Playback error:', err);
+        state.isPlaying = false;
+        updatePlayButton();
+    });
+
+    updatePlayButton();
+    updatePlayerChapterDisplay();
+}
+
+function onAudioEnded() {
+    // 播放下一章
+    state.currentChapterIndex++;
+
+    if (state.currentChapterIndex < state.audioQueue.length) {
+        // 預載下一章
+        preloadNextChapter();
+        // 播放下一章
+        const nextItem = state.audioQueue[state.currentChapterIndex];
+        loadAudio(nextItem);
+    } else {
+        // 所有章節播放完畢
+        state.isPlaying = false;
+        state.currentChapterIndex = 0;
+        updatePlayButton();
+        updatePlayerChapterDisplay();
+    }
+}
+
+function preloadNextChapter() {
+    if (state.isPreloading) return;
+
+    const nextIndex = state.currentChapterIndex + 1;
+    if (nextIndex >= state.audioQueue.length) return;
+
+    state.isPreloading = true;
+
+    // 創建隱藏的音頻元素進行預載
+    const nextItem = state.audioQueue[nextIndex];
+    const audioSrc = `audio/${nextItem.bookAbbr}/${nextItem.bookAbbr}${nextItem.chapter}.mp3`;
+    const preloadAudio = new Audio(audioSrc);
+
+    preloadAudio.addEventListener('canplay', () => {
+        console.log(`Preloaded: ${audioSrc}`);
+        state.isPreloading = false;
+    }, { once: true });
+
+    preloadAudio.addEventListener('error', () => {
+        console.error(`Preload error: ${audioSrc}`);
+        state.isPreloading = false;
+    }, { once: true });
+}
+
+function setPlaybackRate(rate) {
+    state.playbackRate = rate;
+
+    if (state.currentAudio) {
+        state.currentAudio.playbackRate = rate;
+    }
+
+    updateSpeedButtons();
+}
+
+function updatePlayButton() {
+    if (!elements.playBtn) return;
+
+    if (state.isPlaying) {
+        elements.playIcon.classList.add('hidden');
+        elements.pauseIcon.classList.remove('hidden');
+        elements.playBtnText.textContent = '暫停';
+        elements.playBtn.classList.add('playing');
+    } else {
+        elements.playIcon.classList.remove('hidden');
+        elements.pauseIcon.classList.add('hidden');
+        elements.playBtnText.textContent = '播放';
+        elements.playBtn.classList.remove('playing');
+    }
+}
+
+function updateSpeedButtons() {
+    if (!elements.speedBtns) return;
+
+    elements.speedBtns.forEach(btn => {
+        const rate = parseFloat(btn.dataset.rate);
+        if (Math.abs(rate - state.playbackRate) < 0.01) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+}
+
+function updatePlayerChapterDisplay() {
+    if (!elements.playerChapterDisplay) return;
+
+    if (state.audioQueue.length === 0) {
+        elements.playerChapterDisplay.querySelector('.player-chapter-text').textContent = '創世記 1:1-31';
+        return;
+    }
+
+    const currentItem = state.audioQueue[state.currentChapterIndex];
+    if (currentItem) {
+        elements.playerChapterDisplay.querySelector('.player-chapter-text').textContent = currentItem.label;
+    }
 }
 
 // ===== 下拉選單控制 =====
@@ -216,7 +514,7 @@ async function loadBibleData() {
     } catch (error) {
         console.error('載入錯誤:', error);
         elements.loadingMessage.innerHTML = `
-            <p style="color: #ef4444;">❌ 載入失敗</p>
+            <p style="color: #8B5E3C;">載入失敗</p>
             <p style="font-size: 0.9rem; margin-top: 8px;">${error.message}</p>
             <p style="font-size: 0.85rem; margin-top: 16px; color: var(--text-muted);">
                 提示：請確保 bible-data.json 檔案與 index.html 在同一資料夾中
@@ -362,6 +660,17 @@ function handleChapterClick(chapter, type) {
     updateEndSelectionHint();
     updateDisplayButton();
 
+    // 如果音頻正在播放，且選擇已完整，改建音頻隊列並自動切換
+    const isValid = state.startBook && state.startChapter && state.endBook && state.endChapter;
+    if (isValid && state.audioQueue.length > 0) {
+        // 停掉舊音頻
+        stopAudio();
+        // 重建音頻隊列（會停在 queue 的第一章）
+        rebuildAudioQueue();
+        // 自動從新第一章開始播放
+        playAudio();
+    }
+
     // 選擇章節後自動關閉下拉選單
     closeDropdown(type);
 }
@@ -409,6 +718,42 @@ function updateDisplayButton() {
     elements.displayBtn.disabled = !isValid;
 }
 
+// ===== 重建音頻隊列（不改變經文顯示）=====
+function rebuildAudioQueue() {
+    const startBookIndex = state.books.findIndex(b => b.abbr === state.startBook.abbr);
+    const endBookIndex = state.books.findIndex(b => b.abbr === state.endBook.abbr);
+
+    state.audioQueue = [];
+
+    for (let bookIdx = startBookIndex; bookIdx <= endBookIndex; bookIdx++) {
+        const book = state.books[bookIdx];
+        if (!state.bibleData[book.abbr]) continue;
+
+        let chapStart = 1;
+        let chapEnd = book.chapters;
+
+        if (bookIdx === startBookIndex) {
+            chapStart = state.startChapter;
+        }
+        if (bookIdx === endBookIndex) {
+            chapEnd = state.endChapter;
+        }
+
+        for (let chap = chapStart; chap <= chapEnd; chap++) {
+            if (state.bibleData[book.abbr][chap] && state.bibleData[book.abbr][chap].length > 0) {
+                state.audioQueue.push({
+                    bookAbbr: book.abbr,
+                    chapter: chap,
+                    label: `${book.name} ${chap} 章`
+                });
+            }
+        }
+    }
+
+    state.currentChapterIndex = 0;
+    updatePlayerChapterDisplay();
+}
+
 // ===== 顯示經文 =====
 function displayScripture() {
     const startBookIndex = state.books.findIndex(b => b.abbr === state.startBook.abbr);
@@ -427,6 +772,9 @@ function displayScripture() {
 
     // 收集經文
     const chapters = [];
+
+    // 收集音頻隊列
+    state.audioQueue = [];
 
     for (let bookIdx = startBookIndex; bookIdx <= endBookIndex; bookIdx++) {
         const book = state.books[bookIdx];
@@ -447,10 +795,18 @@ function displayScripture() {
             const verses = state.bibleData[book.abbr][chap];
             if (verses && verses.length > 0) {
                 chapters.push({
+                    bookAbbr: book.abbr,
                     bookName: book.name,
                     chapter: chap,
                     // 轉換 [verse, text] 格式
                     verses: verses.map(v => ({ verse: v[0], text: v[1] }))
+                });
+
+                // 添加到音頻隊列
+                state.audioQueue.push({
+                    bookAbbr: book.abbr,
+                    chapter: chap,
+                    label: `${book.name} ${chap} 章`
                 });
             }
         }
@@ -462,8 +818,12 @@ function displayScripture() {
     // 顯示工具列
     elements.toolbar.style.display = 'flex';
 
-    // 滾動到經文區
-    elements.scriptureContent.scrollIntoView({ behavior: 'smooth' });
+    // 滾動到頂部（因為現在是 fixed bar）
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // 重置音頻播放器
+    stopAudio();
+    updatePlayerChapterDisplay();
 }
 
 function renderScripture(chapters) {
