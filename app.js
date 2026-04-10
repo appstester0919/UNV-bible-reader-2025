@@ -124,6 +124,7 @@ function cacheElements() {
     elements.pauseIcon = document.getElementById('pauseIcon');
     elements.playBtnText = document.getElementById('playBtnText');
     elements.speedBtns = document.querySelectorAll('.speed-btn');
+    elements.speedSelect = document.getElementById('playerSpeedSelect');
     elements.prevChapterBtn = document.getElementById('prevChapterBtn');
     elements.nextChapterBtn = document.getElementById('nextChapterBtn');
 }
@@ -176,6 +177,14 @@ function initAudio() {
                 const rate = parseFloat(btn.dataset.rate);
                 setPlaybackRate(rate);
             });
+        });
+    }
+
+    // 速度下拉選單（Mobile）
+    if (elements.speedSelect) {
+        elements.speedSelect.addEventListener('change', (e) => {
+            const rate = parseFloat(e.target.value);
+            setPlaybackRate(rate);
         });
     }
 
@@ -414,6 +423,11 @@ function updateSpeedButtons() {
             btn.classList.remove('active');
         }
     });
+
+    // Also sync mobile dropdown
+    if (elements.speedSelect) {
+        elements.speedSelect.value = state.playbackRate.toString();
+    }
 }
 
 function updatePlayerChapterDisplay() {

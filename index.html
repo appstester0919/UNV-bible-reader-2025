@@ -41,13 +41,13 @@
                         <rect x="6" y="4" width="4" height="16"></rect>
                         <rect x="14" y="4" width="4" height="16"></rect>
                     </svg>
-                    <span id="playBtnText">播放</span>
+                    <span id="playBtnText" class="btn-label-text">播放</span>
                 </button>
                 <button id="stopBtn" class="player-stop-btn" aria-label="停止">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                         <rect x="4" y="4" width="16" height="16" rx="2"></rect>
                     </svg>
-                    <span>停止</span>
+                    <span class="btn-label-text">停止</span>
                 </button>
             </div>
 
@@ -71,6 +71,14 @@
                     <button class="speed-btn" data-rate="1.75">1.75x</button>
                     <button class="speed-btn" data-rate="2.0">2.0x</button>
                 </div>
+                <!-- Mobile speed dropdown (shown on mobile via CSS) -->
+                <select class="player-speed-select" id="playerSpeedSelect" aria-label="播放速度">
+                    <option value="1.0">1.0x</option>
+                    <option value="1.25">1.25x</option>
+                    <option value="1.5">1.5x</option>
+                    <option value="1.75">1.75x</option>
+                    <option value="2.0">2.0x</option>
+                </select>
             </div>
 
             <!-- Font Size Controls -->
