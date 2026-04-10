@@ -1154,9 +1154,47 @@ body {
         border-color: var(--accent-gold);
     }
 
-    /* Font controls: hidden on mobile (use toolbar below scripture) */
+    /* Font controls: compact icon row next to speed dropdown */
     .player-font {
+        display: flex;
+        align-items: center;
+        gap: 3px;
+        flex-shrink: 0;
+    }
+
+    .player-font-btn {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        font-size: 0.75rem;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid var(--border-color);
+        background: var(--bg-card);
+        color: var(--text-primary);
+        cursor: pointer;
+        transition: background var(--transition-fast), border-color var(--transition-fast);
+        flex-shrink: 0;
+    }
+
+    .player-font-btn:active {
+        background: var(--accent-gold-light);
+        border-color: var(--accent-gold);
+    }
+
+    .player-font-size {
         display: none;
+    }
+
+    /* Speed dropdown comes AFTER font controls in the visual order */
+    .player-speed {
+        order: 1;
+    }
+
+    .player-font {
+        order: 0;
     }
 
     /* Stop button: hidden on mobile (tap play to pause) */
